@@ -27,7 +27,8 @@ int main() {
 
 if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "ab+")) == NULL) {
     sistemaBiblioteca = fopen("dadosBiblioteca.txt", "wb");
-    }
+}
+
 do {
     system("clear");
     cout << endl << " -=-=- Sistema de Administração de Biblioteca -=-=- " << endl << endl;
@@ -78,7 +79,7 @@ do {
             livro.statusDisponibilidade = true;
             livro.excluido = false;
 
-            sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb+");
+            sistemaBiblioteca = fopen("dadosBiblioteca.txt", "ab+");
 
             if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
             cout << endl << endl << " -=-=-=- Livro cadastrado com sucesso! -=-=-=- " << endl;
