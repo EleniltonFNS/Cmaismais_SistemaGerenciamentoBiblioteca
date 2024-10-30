@@ -30,7 +30,7 @@ if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "ab+")) == NULL) {
 }
 
 do {
-    system("clear");
+    system("cls");
     cout << endl << " -=-=- Sistema de Administração de Biblioteca -=-=- " << endl << endl;
     cout << " | 1 - Cadastrar novo livro" << endl;
     cout << " | 2 - Alteração de cadastro" << endl;
@@ -46,57 +46,81 @@ do {
     cin.get();
 
     switch (opcaoMenu) {
-        case 1:
-        system("clear");
-        cout << endl << " -=-=-=-=-=-=- Cadastro de Livros -=-=-=-=-=-=- " << endl;
-        cout << endl << " - Deseja cadastrar um livro (S)im ou (N)ão:" << endl;
-        cout << " -> ";
-        cin >> opc;
-        cin.get();
-
-        while (opc == 's' || opc == 'S') {
-            system("clear");
-            cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
-            cout << endl << " - Informe os dados do livro a serem cadastrados: -=- " << endl;
-            cout << endl << " Código: ";
-            cin >> livro.codigo;
-            cin.get();
-            cout << " Título: ";
-            cin.get(livro.titulo, 255);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << " Autor(es): ";
-            cin.get(livro.autores, 255);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << " Editora: ";
-            cin.get(livro.editora, 100);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << " Área de atuação: ";
-            cin.get(livro.area, 100);
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << " Número de páginas: ";
-            cin >> livro.numPaginas;
-
-            livro.statusDisponibilidade = true;
-            livro.excluido = false;
-
-            sistemaBiblioteca = fopen("dadosBiblioteca.txt", "ab+");
-
-            if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
-            cout << endl << endl << " -=-=-=- Livro cadastrado com sucesso! -=-=-=- " << endl;
-            } else {
-            cout << endl << endl << " -=-=-=- Erro ao cadastrar o livro! -=-=-=- " << endl;
-            }
-            fclose(sistemaBiblioteca);
-
-            cout << endl << " - Deseja cadastrar um novo livro (S)im ou (N)ão:" << endl;
+        case 1: // Cadastro de livros
+            system("cls");
+            cout << endl << " -=-=-=-=-=-=- Cadastro de Livros -=-=-=-=-=-=- " << endl;
+            cout << endl << " - Deseja cadastrar um livro (S)im ou (N)ão:" << endl;
             cout << " -> ";
             cin >> opc;
             cin.get();
-        }
-        break;
+
+            while (opc == 's' || opc == 'S') {
+                system("cls");
+                cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
+                cout << endl << " - Informe os dados do livro a serem cadastrados: -=- " << endl;
+                
+                // Verificar se o código já existe
+                bool codigoExiste;
+                do {
+                    codigoExiste = false;
+                    cout << endl << " Código: ";
+                    cin >> livro.codigo;
+                    cin.get();
+                    
+                    FILE *verificacao = fopen("dadosBiblioteca.txt", "rb");
+                    struct Livros livroTemp;
+                    while (fread(&livroTemp, sizeof(struct Livros), 1, verificacao) == 1) {
+                        if (livroTemp.codigo == livro.codigo && !livroTemp.excluido) {
+                            cout << " Código já existe! Por favor, escolha outro código." << endl;
+                            codigoExiste = true;
+                            break;
+                        }
+                    }
+                    fclose(verificacao);
+                } while (codigoExiste);
+
+                cout << " Título: ";
+                cin.get(livro.titulo, 255);
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << " Autor(es): ";
+                cin.get(livro.autores, 255);
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << " Editora: ";
+                cin.get(livro.editora, 100);
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                cout << " Área de atuação: ";
+                cin.get(livro.area, 100);
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                
+                do {
+                    cout << " Número de páginas: ";
+                    cin >> livro.numPaginas;
+                    if (livro.numPaginas <= 0) {
+                        cout << " Número de páginas inválido! Digite um número maior que 0." << endl;
+                    }
+                } while (livro.numPaginas <= 0);
+
+                livro.statusDisponibilidade = true;
+                livro.excluido = false;
+
+                sistemaBiblioteca = fopen("dadosBiblioteca.txt", "ab+");
+
+                if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                    cout << endl << endl << " -=-=-=- Livro cadastrado com sucesso! -=-=-=- " << endl;
+                } else {
+                    cout << endl << endl << " -=-=-=- Erro ao cadastrar o livro! -=-=-=- " << endl;
+                }
+                fclose(sistemaBiblioteca);
+
+                cout << endl << " - Deseja cadastrar um novo livro (S)im ou (N)ão:" << endl;
+                cout << " -> ";
+                cin >> opc;
+                cin.get();
+            }
+            break;
 
         case 2:
-            system("clear");
+            system("cls");
             if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb+")) != NULL) {
                 cout << endl << " -=-=-=-=-=-=- Alteração de cadastro -=-=-=-=-=-=- " << endl;
                 cout << endl << " - Deseja alterar o cadastro de um livro (S)im ou (N)ão:" << endl;
@@ -105,74 +129,72 @@ do {
                 cin.get();
 
                 while (opc == 's' || opc == 'S') {
-                cout << endl << " -=- Informe o código do livro a ser alterado -=- " << endl;
-                cout << " Código: ";
-                cin >> cod;
-                cin.get();
+                    cout << endl << " -=- Informe o código do livro a ser alterado -=- " << endl;
+                    cout << " Código: ";
+                    cin >> cod;
+                    cin.get();
 
-                int posicao = 0;
-                bool encontrado = false;
+                    int posicao = 0;
+                    bool encontrado = false;
+                    
+                    rewind(sistemaBiblioteca); // Volta ao início do arquivo
+                    
+                    while (fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                        if (cod == livro.codigo && !livro.excluido) {
+                            encontrado = true;
+                            cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
+                            cout << " Código atual: " << livro.codigo << endl;
+                            cout << " Título atual: " << livro.titulo << endl;
+                            cout << " Autor(es) atual: " << livro.autores << endl;
+                            cout << " Editora atual: " << livro.editora << endl;
+                            cout << " Área atual: " << livro.area << endl;
+                            cout << " Número de páginas atual: " << livro.numPaginas << endl;
+                            
+                            cout << endl << " Digite os novos dados:" << endl;
+                            cout << " Título: ";
+                            cin.get(livro.titulo, 255);
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << " Autor(es): ";
+                            cin.get(livro.autores, 255);
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << " Editora: ";
+                            cin.get(livro.editora, 100);
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << " Área de atuação: ";
+                            cin.get(livro.area, 100);
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << " Número de páginas: ";
+                            cin >> livro.numPaginas;
+                            cin.get();
 
-                while (!feof(sistemaBiblioteca)) {
-                    fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca);
-                    if (cod == livro.codigo && !livro.excluido) {
-                    encontrado = true;
-                    cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
-                    cout << endl << " -=- Código: " << livro.codigo << endl;
-                    cout << " Título: " << livro.titulo << endl;
-                    cout << " Autor(es): " << livro.autores << endl;
-                    cout << " Editora: " << livro.editora << endl;
-                    cout << " Área de atuação: " << livro.area << endl;
-                    cout << " Número de páginas: " << livro.numPaginas << endl;
-                    if (livro.statusDisponibilidade) {
-                        cout << " Status: Disponível para empréstimo" << endl;
-                        } else {
-                        cout << " Status: Emprestado para " << livro.emprestimoLivro.nomeUsuario << endl;
+                            fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
+                            if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                                cout << endl << " -=-=-=- Livro alterado com sucesso! -=-=-=- " << endl;
+                            } else {
+                                cout << endl << " -=-=-=- Erro ao alterar dados do livro! -=-=-=- " << endl;
+                            }
+                            break;
                         }
+                        posicao++;
                     }
-                    cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
-                    cout << " Título: ";
-                    cin.get(livro.titulo, 255);
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << " Autor(es): ";
-                    cin.get(livro.autores, 255);
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << " Editora: ";
-                    cin.get(livro.editora, 100);
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << " Área de atuação: ";
-                    cin.get(livro.area, 100);
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    cout << " Número de páginas: ";
-                    cin >> livro.numPaginas;
-
-                    fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
-                    if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
-                        cout << endl << " -=-=-=- Livro alterado com sucesso! -=-=-=- ";
-                    } else {
-                        cout << endl << " -=-=-=- Erro ao alterar dados do livro! -=-=-=- ";
-                    }
-                    break;
-                    }
-                    posicao++;
 
                     if (!encontrado) {
                         cout << endl << " -=-=-=- Livro não encontrado ou excluído! -=-=-=- " << endl;
                     }
+
                     cout << endl << " - Deseja alterar outro livro (S)im ou (N)ão:" << endl;
                     cout << " -> ";
                     cin >> opc;
                     cin.get();
-
-                }   
+                }
                 fclose(sistemaBiblioteca);
             } else {
-                cout << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- ";
-                break;
+                cout << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- " << endl;
             }
             break;
+
         case 3: // Exclusão de cadastro
-            system("clear");
+            system("cls");
             if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb+")) != NULL) {
                 cout << endl << " -=-=-=-=-=-=- Exclusão de cadastro -=-=-=-=-=-=- " << endl;
                 cout << endl << " - Deseja excluir o cadastro de um livro (S)im ou (N)ão:" << endl;
@@ -181,7 +203,7 @@ do {
                 cin.get();
 
                 while (opc == 's' || opc == 'S') {
-                    system("clear");
+                    system("cls");
                     cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
                     cout << endl << " - Informe o código do livro a ser excluido: -=-=-=-=-=-=-=-=- " << endl;
                     cout << endl << " Código: ";
@@ -190,10 +212,10 @@ do {
 
                     int posicao = 0;
                     bool encontrado = false;
+                    rewind(sistemaBiblioteca);
 
-                    while (!feof(sistemaBiblioteca)) {
-                        fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca);
-                        if (cod == livro.codigo && !livro.excluido && livro.statusDisponibilidade == false) {
+                    while (fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                        if (cod == livro.codigo && !livro.excluido) {
                             encontrado = true;
                             cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
                             cout << endl << " Código: " << livro.codigo << endl;
@@ -202,26 +224,32 @@ do {
                             cout << " Editora: " << livro.editora << endl;
                             cout << " Área de atuação: " << livro.area << endl;
                             cout << " Número de páginas: " << livro.numPaginas << endl;
-                            cout << " Status: Dispónivel para empréstimo" << endl;
-                        
-                            cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl << endl;
+                            
+                            if (livro.statusDisponibilidade) {
+                                cout << " Status: Disponível para empréstimo" << endl;
+                                
+                                cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl << endl;
 
-                            char opcExcluir;
-                            cout << "- Confirmar exclusão do cadastro de livro (S)im ou (N)ão:";
-                            cout << " -> ";
-                            cin >> opcExcluir;
-                            cin.get();
+                                char opcExcluir;
+                                cout << "- Confirmar exclusão do cadastro de livro (S)im ou (N)ão:";
+                                cout << " -> ";
+                                cin >> opcExcluir;
+                                cin.get();
 
-                            if (opcExcluir == 's' || opcExcluir == 'S') {
-                                livro.excluido = true; // Marcar como excluído
-                                fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
-                                if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
-                                    cout << endl << " -=-=-=- Livro excluído com sucesso! -=-=-=- ";
+                                if (opcExcluir == 's' || opcExcluir == 'S') {
+                                    livro.excluido = true;
+                                    fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
+                                    if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                                        cout << endl << " -=-=-=- Livro excluído com sucesso! -=-=-=- " << endl;
+                                    } else {
+                                        cout << endl << " -=-=-=- Erro ao excluir o livro! -=-=-=- " << endl;
+                                    }
                                 } else {
-                                    cout << endl << " -=-=-=- Erro ao alterar dados do livro! -=-=-=- ";
+                                    cout << endl << " -=-=-=- Exclusão cancelada! -=-=-=- " << endl;
                                 }
                             } else {
-                                cout << endl << " -=-=-=- Exclusão cancelada! -=-=-=- ";
+                                cout << " Status: Emprestado para " << livro.emprestimoLivro.nomeUsuario << endl;
+                                cout << endl << " -=-=-=- Não é possível excluir um livro que está emprestado! -=-=-=- " << endl;
                             }
                             break;
                         }
@@ -230,29 +258,21 @@ do {
 
                     if (!encontrado) {
                         cout << endl << " -=-=-=- Livro não encontrado ou já excluído! -=-=-=- " << endl;
-
-                    } else if (livro.statusDisponibilidade == false){
-                        cout << endl << " -=-=-=- Não é possível realizar a exclusão desse cadastro, pois o livro está emprestado! -=-=-=-" << endl;
                     }
 
-                    cin.ignore();
-                    cin.get();
-
-                    system("clear");
-                    cout << endl << " -=-=-=-=-=-=- Exclusão de cadastro -=-=-=-=-=-=- " << endl;
-                    cout << endl << " - Deseja excluir o cadastro de um outro livro (S)im ou (N)ão:" << endl;
+                    cout << endl << " - Deseja tentar excluir outro livro (S)im ou (N)ão:" << endl;
                     cout << " -> ";
                     cin >> opc;
                     cin.get();
                 }
                 fclose(sistemaBiblioteca);
             } else {
-                cout << endl << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- ";
-                break;
+                cout << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- " << endl;
             }
             break;
+
         case 4: // Empréstimos de livros
-            system("clear");
+            system("cls");
             cout << endl << " -=-=-=-=-=-=- Realizar emprestimo de livros -=-=-=-=-=-=- " << endl;
             cout << endl << " - Deseja realizar o emprestimo de um livro (S)im ou (N)ão:" << endl;
             cout << " -> ";
@@ -269,10 +289,10 @@ do {
 
                     int posicao = 0;
                     bool encontrado = false;
+                    rewind(sistemaBiblioteca);
 
-                    while (!feof(sistemaBiblioteca)) {
-                        fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca);
-                        if (cod == livro.codigo && !livro.excluido && livro.statusDisponibilidade == true) {
+                    while (fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                        if (cod == livro.codigo && !livro.excluido) {
                             encontrado = true;
                             cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
                             cout << endl << " Código: " << livro.codigo << endl;
@@ -281,50 +301,56 @@ do {
                             cout << " Editora: " << livro.editora << endl;
                             cout << " Área de atuação: " << livro.area << endl;
                             cout << " Número de páginas: " << livro.numPaginas << endl;
-                        
-                            cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl << endl;
+                            
+                            if (livro.statusDisponibilidade) {
+                                cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl << endl;
 
-                            cout << " Nome do usuário: ";
-                            cin.get(livro.emprestimoLivro.nomeUsuario, 255);
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << " Data do empréstimo (DD/MM/AAAA): ";
-                            cin.get(livro.emprestimoLivro.dataEmprestimo, 10);
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            cout << " Data prevista para devolução (DD/MM/AAAA): ";
-                            cin.get(livro.emprestimoLivro.dataDevolucao, 10);
-                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                            livro.statusDisponibilidade = false;
+                                cout << " Nome do usuário: ";
+                                cin.get(livro.emprestimoLivro.nomeUsuario, 255);
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                cout << " Data do empréstimo (DD/MM/AAAA): ";
+                                cin.get(livro.emprestimoLivro.dataEmprestimo, 10);
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                                cout << " Data prevista para devolução (DD/MM/AAAA): ";
+                                cin.get(livro.emprestimoLivro.dataDevolucao, 10);
+                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-                            fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
-                            if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
-                                cout << endl << " -=-=-=- Livro emprestado com sucesso! -=-=-=- ";
+                                livro.statusDisponibilidade = false;
+
+                                fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
+                                if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                                    cout << endl << " -=-=-=- Livro emprestado com sucesso! -=-=-=- " << endl;
+                                } else {
+                                    cout << endl << " -=-=-=- Erro ao realizar emprestimo do livro! -=-=-=- " << endl;
+                                }
                             } else {
-                                cout << endl << " -=-=-=- Erro ao realizar emprestimo do livro! -=-=-=- ";
+                                cout << " Status: Emprestado para " << livro.emprestimoLivro.nomeUsuario << endl;
+                                cout << endl << " -=-=-=- Este livro já está emprestado! -=-=-=- " << endl;
                             }
                             break;
                         }
                         posicao++;
                     }
+
                     if (!encontrado) {
-                        cout << endl << " -=-=-=- Livro não encontrado ou já excluído! -=-=-=- " << endl;
-                    } else if (livro.statusDisponibilidade == false){
-                        cout << endl << " -=-=-=- Livro já está emprestado! -=-=-=-" << endl;
+                        cout << endl << " -=-=-=- Livro não encontrado ou excluído! -=-=-=- " << endl;
                     }
+
                     fclose(sistemaBiblioteca);
                 } else {
-                    cout << endl << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- ";
+                    cout << endl << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- " << endl;
                     break;
                 }
-                system("clear");
-                cout << endl << " -=-=-=-=-=-=- Confirmado o emprestimo -=-=-=-=-=-=- " << endl;
-                cout << endl << " - Deseja realizar o emprestimo de outro livro (S)im ou (N)ão:" << endl;
+
+                cout << endl << " - Deseja realizar outro empréstimo (S)im ou (N)ão:" << endl;
                 cout << " -> ";
                 cin >> opc;
                 cin.get();
             }
             break;
+
         case 5: // Devolução do livro
-            system("clear");
+            system("cls");
             cout << endl << " -=-=-=-=-=-=- Registrar devolução de livros -=-=-=-=-=-=- " << endl;
             cout << endl << " - Deseja registrar a devolução de um livro (S)im ou (N)ão:" << endl;
             cout << " -> ";
@@ -341,30 +367,46 @@ do {
 
                     int posicao = 0;
                     bool encontrado = false;
+                    rewind(sistemaBiblioteca);
 
-                    while (!feof(sistemaBiblioteca)) {
-                        fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca);
-                        if (cod == livro.codigo && !livro.excluido && livro.statusDisponibilidade == false) {
+                    while (fread(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                        if (cod == livro.codigo && !livro.excluido) {
                             encontrado = true;
+                            cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
                             cout << endl << " Código: " << livro.codigo << endl;
                             cout << " Título: " << livro.titulo << endl;
                             cout << " Autor(es): " << livro.autores << endl;
                             cout << " Editora: " << livro.editora << endl;
                             cout << " Área de atuação: " << livro.area << endl;
                             cout << " Número de páginas: " << livro.numPaginas << endl;
-                            cout << " Status: Emprestado para " << livro.emprestimoLivro.nomeUsuario << endl;
 
-                            fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
-                            livro.statusDisponibilidade = true; // Livro disponível após a devolução
-                                
-                            strcpy(livro.emprestimoLivro.nomeUsuario, "");
-                            strcpy(livro.emprestimoLivro.dataEmprestimo, "");
-                            strcpy(livro.emprestimoLivro.dataDevolucao, "");
+                            if (!livro.statusDisponibilidade) {
+                                cout << " Status: Emprestado para " << livro.emprestimoLivro.nomeUsuario << endl;
 
-                            if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
-                                cout << endl << " -=-=-=- Devolução registrada com sucesso! -=-=-=- ";
+                                char opcDevolver;
+                                cout << endl << "- Confirmar devolução do livro (S)im ou (N)ão:";
+                                cout << " -> ";
+                                cin >> opcDevolver;
+                                cin.get();
+
+                                if (opcDevolver == 's' || opcDevolver == 'S') {
+                                    livro.statusDisponibilidade = true;
+                                    strcpy(livro.emprestimoLivro.nomeUsuario, "");
+                                    strcpy(livro.emprestimoLivro.dataEmprestimo, "");
+                                    strcpy(livro.emprestimoLivro.dataDevolucao, "");
+
+                                    fseek(sistemaBiblioteca, sizeof(struct Livros) * posicao, SEEK_SET);
+                                    if (fwrite(&livro, sizeof(struct Livros), 1, sistemaBiblioteca) == 1) {
+                                        cout << endl << " -=-=-=- Devolução registrada com sucesso! -=-=-=- " << endl;
+                                    } else {
+                                        cout << endl << " -=-=-=- Erro ao registrar a devolução! -=-=-=- " << endl;
+                                    }
+                                } else {
+                                    cout << endl << " -=-=-=- Devolução cancelada! -=-=-=- " << endl;
+                                }
                             } else {
-                                cout << endl << " -=-=-=- Erro ao registrar a devolução do livro! -=-=-=- ";
+                                cout << " Status: Disponível para empréstimo" << endl;
+                                cout << endl << " -=-=-=- Este livro não está emprestado! -=-=-=- " << endl;
                             }
                             break;
                         }
@@ -372,13 +414,14 @@ do {
                     }
 
                     if (!encontrado) {
-                        cout << endl << " -=-=-=- Livro não encontrado ou já excluído! -=-=-=- " << endl;
+                        cout << endl << " -=-=-=- Livro não encontrado ou excluído! -=-=-=- " << endl;
                     }
+
                     fclose(sistemaBiblioteca);
                 } else {
-                    cout << endl << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- ";
+                    cout << endl << " -=-=-=- Erro ao abrir o banco de dados! -=-=-=- " << endl;
                 }
-                system("clear");
+                system("cls");
                 cout << endl << " -=-=-=-=-=-=- Devolução Confirmada -=-=-=-=-=-=- " << endl;
                 cout << endl << " - Deseja registrar a devolução de outro livro (S)im ou (N)ão:" << endl;
                 cout << " -> ";
@@ -387,7 +430,7 @@ do {
             }
             break;
         case 6: // Consulta de Livro
-            system("clear");
+            system("cls");
             if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb")) != NULL) {
                 cout << endl << " -=-=-=-=-=-=- Consulta de Livro -=-=-=-=-=-=- " << endl;
                 cout << endl << " - Deseja consultar um livro (S)im ou (N)ão:" << endl;
@@ -396,7 +439,7 @@ do {
                 cin.get();
     
                 while (opc == 's' || opc == 'S') {
-                system("clear");
+                system("cls");
                 cout << endl << " -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=- " << endl;
                 cout << endl << " - Informe o código do livro a ser consultado: -=-=-=-=-=- " << endl;
                 cout << endl << " Código: ";
@@ -432,7 +475,7 @@ do {
                 cin.ignore();
                 cin.get();
     
-                system("clear");
+                system("cls");
                 cout << endl << " -=-=-=-=-=-=- Consulta de Livro -=-=-=-=-=-=- " << endl;
                 cout << endl << " - Deseja consultar outro livro (S)im ou (N)ão:" << endl;
                 cout << " -> ";
@@ -446,7 +489,7 @@ do {
             break;
     
         case 7: // Livros Disponíveis
-            system("clear");
+            system("cls");
             if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb")) != NULL) {
                 cout << endl << " -=-=-=-=-=-=- Livros Disponíveis -=-=-=-=-=-=- " << endl;
     
@@ -475,7 +518,7 @@ do {
             }
             break;
         case 8: // Listar livros cadastrados
-            system("clear");
+            system("cls");
             if ((sistemaBiblioteca = fopen("dadosBiblioteca.txt", "rb")) != NULL) {
                 cout << endl << " -=-=-=-=-=-=- Lista de Livros Cadastrados -=-=-=-=-=-=- " << endl;
                 int posicao = 0;
